@@ -1,5 +1,7 @@
 from textastic import Textastic
 import pprint as pp
+import sankey as sk
+import hw1 as hw
 
 def main():
     tt = Textastic()
@@ -9,7 +11,9 @@ def main():
     tt.load_text('clinton.txt', 'clinton')
     #pp.pprint(tt.data)
     #print(tt.top10_words())
-    tt.create_sankey('trump','bush','carter','clinton')
+    df = tt.create_sankey('bush','carter','clinton','trump')
+    print(df)
+    hw.execute_sankey(df, ['Name', 'word'], 'frequency')
 
 
 

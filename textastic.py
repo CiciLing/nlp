@@ -30,6 +30,9 @@ class Textastic:
         # put in lower case
         filtered_words = []
         words = [word.lower() for word in words]
+        words = [word.strip('.') for word in words]
+        words = [word.strip(':') for word in words]
+        words = [word.strip(',') for word in words]
         for word in words:
             if word not in stop_words:
                 filtered_words.append(word)
@@ -74,10 +77,19 @@ class Textastic:
 
     def create_sankey(self,file1,file2,file3,file4):
         count_dict = self.data['wordcount']
-        df = pd.DataFrame(count_dict[file1].items)
+        df1 = pd.DataFrame(list(count_dict[file1].items()),columns=['word','frequency'])
+        df1.insert(0, 'Name', file1)
+        df2 = pd.DataFrame(list(count_dict[file2].items()),columns=['word','frequency'])
+        df2.insert(0, 'Name', file2)
+        df3 = pd.DataFrame(list(count_dict[file3].items()),columns=['word','frequency'])
+        df3.insert(0, 'Name', file3)
+        df4 = pd.DataFrame(list(count_dict[file4].items()), columns=['word', 'frequency'])
+        df4.insert(0, 'Name', file4)
+
+        df = pd.concat([df1, df2, df3, df4], ignore_index=True)
+        return df
 
 
-        print(df)
         #sk.make_sankey(wc_df, wc_df[''], wc_df[''])
 
 
