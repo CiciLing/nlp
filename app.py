@@ -14,6 +14,7 @@ def main():
     df = tt.create_sankey('bush','carter','clinton','trump')
     print(df)
     hw.execute_sankey(df, ['Name', 'word'], 'frequency')
+    # check push
 
 
 

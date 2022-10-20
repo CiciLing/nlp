@@ -76,6 +76,7 @@ class Textastic:
 
 
     def create_sankey(self,file1,file2,file3,file4):
+        # check push
         count_dict = self.data['wordcount']
         df1 = pd.DataFrame(list(count_dict[file1].items()),columns=['word','frequency'])
         df1.insert(0, 'Name', file1)
