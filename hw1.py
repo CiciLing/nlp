@@ -37,7 +37,7 @@ def extract_local_network(df, col, val, **kwargs):
 
     groups.sort_values(val, ascending=False, inplace=True)
     # set a minimal value as a filter so the graph is clearer
-    min_val = kwargs.get('min_val', 20)
+    min_val = kwargs.get('min_val', 1)
     groups = groups[groups[val] >= min_val]
     return groups
 
