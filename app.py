@@ -11,8 +11,11 @@ def main():
     #pp.pprint(tt.data)
     #print(tt.top10_words())
     df = tt.create_sankey('bush','carter','clinton','trump')
-    hw.execute_sankey(df, ['Name', 'word'], 'frequency')
+    #hw.execute_sankey(df, ['Name', 'word'], 'frequency')
     # check pus
+    df2 = hw.k_most_frequent(df, ['Name','frequency'])
+    print(df2)
+    hw.execute_sankey(df2, ['Name', 'word'], 'frequency')
 
 
 
