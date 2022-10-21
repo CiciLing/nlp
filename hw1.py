@@ -49,22 +49,3 @@ def show_sankey(df, src, targ, vals=None, **kwargs):
     fig = make_sankey(df, src, targ, vals, **kwargs)
     fig.show()
 
-def k_most_frequent(df, col, word_list = None, k = 10):
-    df2 = df.sort_values([col[1]], ascending=False).groupby(col[0]).head(k)
-    return df2
-def execute_sankey(df, col, val, **kwargs ):
-    '''
-    :param df: original dataframe that contains selected data
-    :param col: the targets and sources of the sankey diagram
-    :param val: the name of grouped count column
-    :return: a sankey diagram showing the connections
-    '''
-    # render the dataset to selected group dataframe
-    min_val = kwargs.get('min_val', 0)
-    df = df[df[val] >= min_val]
-    show_sankey(df, col[0], col[1], vals=val)
-
-
-# create 2 new functions to execute different thing
-# only check for list of words - if in
-# union of k most frequent - groupby.sort

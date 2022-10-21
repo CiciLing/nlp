@@ -1,10 +1,8 @@
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
 import pandas as pd
-import nltk
 from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-from heapq import nlargest
+import hw1 as hw
 
 # check update
 
@@ -65,7 +63,7 @@ class Textastic:
             plt.bar(label, nw)
         plt.show()
 
-    def create_sankey(self,file1,file2,file3,file4):
+    def extract_local_data(self,file1,file2,file3,file4):
         count_dict = self.data['wordcount']
         df1 = pd.DataFrame(list(count_dict[file1].items()),columns=['word','frequency'])
         df1.insert(0, 'Name', file1)
@@ -78,17 +76,23 @@ class Textastic:
 
         df = pd.concat([df1, df2, df3, df4], ignore_index=True)
         return df
-    def specify_word(self):
-         pass
 
-    def k_most_common(self):
-        pass
+    def execute_sankey(self, df, col, val, word_list = None, k = None, **kwargs):
+        '''
+        :param df: original dataframe that contains selected data
+        :param col: the targets and sources of the sankey diagram
+        :param val: the name of grouped count column
+        :return: a sankey diagram showing the connections
+        '''
+        if word_list == None and k != None:
+            df2 = df.sort_values([val], ascending=False).groupby(col[0]).head(k)
+        elif k == None and word_list != None:
+            pass
+        else:
+            min_val = kwargs.get('min_val', 7)
+            df2 = df[df[val] >= min_val]
+        hw.show_sankey(df2, col[0], col[1], vals=val)
 
-    def wordcount_sankey(self, word_list=None, k=5):
-        pass
-
-
-        #sk.make_sankey(wc_df, wc_df[''], wc_df[''])
 
 
 
