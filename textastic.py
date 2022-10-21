@@ -1,6 +1,5 @@
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
-import sankey as sk
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
@@ -66,17 +65,7 @@ class Textastic:
             plt.bar(label, nw)
         plt.show()
 
-    # def _top10_words(self):
-    #     top10_list = []
-    #     wdict = Counter(self.data['wordcount'])
-    #     for k,v in wdict.items():
-    #         top = nlargest(15, v, key=v.get)
-    #         top10_list.append(top)
-    #     return top10_list
-
-
     def create_sankey(self,file1,file2,file3,file4):
-        # check push
         count_dict = self.data['wordcount']
         df1 = pd.DataFrame(list(count_dict[file1].items()),columns=['word','frequency'])
         df1.insert(0, 'Name', file1)
@@ -89,6 +78,14 @@ class Textastic:
 
         df = pd.concat([df1, df2, df3, df4], ignore_index=True)
         return df
+    def specify_word(self):
+         pass
+
+    def k_most_common(self):
+        pass
+
+    def wordcount_sankey(self, word_list=None, k=5):
+        pass
 
 
         #sk.make_sankey(wc_df, wc_df[''], wc_df[''])

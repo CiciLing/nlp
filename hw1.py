@@ -1,22 +1,54 @@
 import pandas as pd
-import sankey as sk
+
+import plotly.graph_objects as go
 
 
-def min_val(df, val, **kwargs):
-    '''
-    :param df: original dataframe that contains selected data
-    :param col: the targets and sources of the sankey diagram
-    :param val: the name of grouped count column
-    :param kwargs: any other possible factor, eg. minimal count as a filter
-    :return: a new dataframe that contain selected factors and their grouped counts
-    '''
+def _code_mapping(df, src, targ):
+    """ Map labels in src and targ columns to integers """
+    # Get distinct labels
+    labels = sorted(list(set(list(df[src]) + list(df[targ]))))
 
-    df.sort_values(val, ascending=False, inplace=True)
-    # set a minimal value as a filter so the graph is clearer
-    min_val = kwargs.get('min_val', 7)
-    groups = df[df[val] >= min_val]
-    return groups
-def execute_sankey(df, col, val):
+    # Get integer codes
+    codes = list(range(len(labels)))
+
+    # Create label to code mapping
+    lc_map = dict(zip(labels, codes))
+
+    # Substitute names for codes in dataframe
+    df = df.replace({src: lc_map, targ: lc_map})
+    return df, labels
+
+def make_sankey(df, src, targ, vals=None, **kwargs):
+    """ Generate a sankey diagram
+    df - Dataframe
+    src - Source column
+    targ - Target column
+    vals - Values column (optional)
+    optional params: pad, thickness, line_color, line_width """
+
+    if vals:
+        values = df[vals]
+    else:
+        values = [1] * len(df[src])  # all 1
+
+    df, labels = _code_mapping(df, src, targ)
+    link = {'source': df[src], 'target': df[targ], 'value': values}
+
+    pad = kwargs.get('pad', 50)
+    thickness = kwargs.get('thickness', 50)
+    line_color = kwargs.get('line_color', 'black')
+    line_width = kwargs.get('line_width', 1)
+
+    node = {'label': labels, 'pad': pad, 'thickness': thickness, 'line': {'color': line_color, 'width': line_width}}
+    sk = go.Sankey(link=link, node=node)
+    fig = go.Figure(sk)
+
+    return fig
+def show_sankey(df, src, targ, vals=None, **kwargs):
+    fig = make_sankey(df, src, targ, vals, **kwargs)
+    fig.show()
+
+def execute_sankey(df, col, val, **kwargs ):
     '''
     :param df: original dataframe that contains selected data
     :param col: the targets and sources of the sankey diagram
@@ -24,11 +56,11 @@ def execute_sankey(df, col, val):
     :return: a sankey diagram showing the connections
     '''
     # render the dataset to selected group dataframe
-    groups = min_val(df, val)
+    min_val = kwargs.get('min_val', 7)
+    df = df[df[val] >= min_val]
+    show_sankey(df, col[0], col[1], vals=val)
 
-    # if multi-factors(n > 2), refer directly to the renamed source and target
-    if len(col) > 2:
-        sk.show_sankey(groups, 'Source', 'Target', vals=val)
-    # if two factors, refer to the column names
-    else:
-        sk.show_sankey(groups, col[0], col[1], vals=val)
+
+# create 2 new functions to execute different thing
+# only check for list of words - if in
+# union of k most frequent - groupby.sort
