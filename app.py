@@ -12,7 +12,7 @@ def main():
     #print(tt.top10_words())
     df = tt.create_sankey('bush','carter','clinton','trump')
     hw.execute_sankey(df, ['Name', 'word'], 'frequency')
-    # check push
+    # check pus
 
 
 
