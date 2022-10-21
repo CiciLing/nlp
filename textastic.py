@@ -119,11 +119,10 @@ class Textastic:
         all_data = []
         for i in range(len(filename)):
             file_data = []
-            total_word, unique_word = Textastic.heaps_law(filename[i])
-            file_data.append(total_word)
-            file_data.append(unique_word)
+            file_data = Textastic.heaps_law(self,filename[i])
             all_data.append(file_data)
-            plt.plot(all_data[i][0], all_data[i][1], label=label)
+            plt.plot(all_data[i][0], all_data[i][1], label=label[i])
+        print(all_data)
         plt.title('Heaps Law')
         plt.legend()
         plt.show()

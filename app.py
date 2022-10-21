@@ -10,9 +10,9 @@ def main():
     tt.load_text('clinton.txt', 'clinton')
     df = tt.extract_local_data('bush','carter','clinton','trump')
     #tt.execute_sankey(df, ['Name', 'word'], 'frequency', word_list = ['nuclear'])
-    file_name = ['trump.txt', 'bush.txt', 'carter.txt', 'clinton.txt']
-    label = ['trump','bush','carter','clinton']
-    tt.plot_heaps(file_name, label)
+    files = ['trump.txt', 'bush.txt', 'carter.txt', 'clinton.txt']
+    labels = ['trump','bush','carter','clinton']
+    tt.plot_heaps(files, labels)
 
 
 if __name__ == '__main__':
