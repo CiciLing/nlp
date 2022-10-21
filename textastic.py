@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from nltk.corpus import stopwords
 import hw1 as hw
+import nltk
 
 # check update
 
@@ -87,11 +88,45 @@ class Textastic:
         if word_list == None and k != None:
             df2 = df.sort_values([val], ascending=False).groupby(col[0]).head(k)
         elif k == None and word_list != None:
-            pass
+            df2 = df[df['word'].isin(word_list)]
         else:
             min_val = kwargs.get('min_val', 7)
             df2 = df[df[val] >= min_val]
         hw.show_sankey(df2, col[0], col[1], vals=val)
+
+    '''
+    - tokenizing (splitting text into words) *which we already did* 
+    - find unique words by converting to set 
+    - # unique words/# total words so we need list of both to plot 
+    '''
+    def heaps_law(self, filename):
+        # total words
+        f = open(filename, encoding='utf-8')
+        text = f.read()
+        words = text.split()
+        words = [word.lower() for word in words]
+
+        total_word = []
+        unique_word = []
+        uniq = set()
+        for i, token in enumerate(words):
+            uniq.add(token)
+            total_word.append(i)
+            unique_word.append(len(uniq))
+        return total_word, unique_word
+
+    def plot_heaps(self, filename, label):
+        all_data = []
+        for i in range(len(filename)):
+            file_data = []
+            total_word, unique_word = Textastic.heaps_law(filename[i])
+            file_data.append(total_word)
+            file_data.append(unique_word)
+            all_data.append(file_data)
+            plt.plot(all_data[i][0], all_data[i][1], label=label)
+        plt.title('Heaps Law')
+        plt.legend()
+        plt.show()
 
 
 
