@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from nltk.corpus import stopwords
 import hw1 as hw
-import nltk
+from nltk import tokenize
+from textblob import TextBlob
 
-# check update
 
 class Textastic:
 
@@ -17,32 +17,45 @@ class Textastic:
         for k, v in results.items():
             self.data[k][label] = v
 
-
     @staticmethod
     def _default_parser(filename):
-        f = open(filename, encoding = 'utf-8')
+        '''
+        Reads in the text files and does pre-processing to clean up the data and then returns some stats on the text.
+        :param filename (str): the name of the file to be processed
+        :return: a dictionary storing the file information including a dict counting each time a word is repeated,
+        number of words, and a list of sentences
+        '''
+
+        # opening file and reading data
+        f = open(filename, encoding='utf-8')
         text = f.read()
-        words= text.split()
+
+        # initializing empty list to store all words once filtered
+        filtered_words = []
+
+        # splitting text by words, converting to lowercase, and removing unnecessary characters
+        words = text.split()
         stop_words = stopwords.words('english')
         stop_words.append('—')
-        # put in lower case
-        filtered_words = []
         words = [word.lower() for word in words]
         words = [word.strip('.') for word in words]
         words = [word.strip(':') for word in words]
         words = [word.strip(',') for word in words]
+
+        # filtering out stop words
         for word in words:
             if word not in stop_words:
                 filtered_words.append(word)
 
+        # calling tokenize to seperate text into sentences
+        sentences = tokenize.sent_tokenize(text)
+
         wc = dict(Counter(filtered_words))
         num = len(filtered_words)
 
-        #bigrams = Counter(map(''.join, zip(filtered_words, words[1:])))
-
-        #print(bigrams)
         f.close()
-        return {'wordcount': wc, 'numwords': num}
+
+        return {'wordcount': wc, 'numwords': num, 'sentences': sentences, 'words': words}
 
 
     def load_text(self, filename, label=None, parser=None):
@@ -94,17 +107,53 @@ class Textastic:
             df2 = df[df[val] >= min_val]
         hw.show_sankey(df2, col[0], col[1], vals=val)
 
-    '''
-    - tokenizing (splitting text into words) *which we already did* 
-    - find unique words by converting to set 
-    - # unique words/# total words so we need list of both to plot 
-    '''
-    def heaps_law(self, filename):
+    def sentiment_subplot(self):
+        '''
+        Creates a figure that renders subplots plotting the polarity and subjectivity values by sentences for each text.
+        '''
+
+        # pulls dictionary of sentences from data
+        sentences_dict = self.data['sentences']
+
+        # defining number of rows/cols based on number of text files in dict
+        n = len(sentences_dict)
+        cols = int(n ** .5)
+        rows = n // cols
+        if n % cols != 0:
+            rows += 1
+
+        # creates list going thru range of number of subplots to use for position
+        position = range(1, n + 1)
+
+        # initializing figure
+        fig = plt.figure(1)
+
+        # outer for loop: loops through position list to add subplots one by one
+        # loops thru keys/values of sentences dict, creates list to store subjectivity/polarity values and graphs points
+        # inner for loop: loops thru every sentence in sentences list, gets subjectivity/polarity values to add to list
+        for i in range(n):
+            for k, v in sentences_dict.items():
+                polarity_list = []
+                subjectivity_list = []
+                for sentence in v:
+                    text = TextBlob(sentence)
+                    polarity_list.append(text.sentiment.polarity)
+                    subjectivity_list.append(text.sentiment.subjectivity)
+                ax = fig.add_subplot(rows, cols, position[list(sentences_dict).index(k)])
+                ax.set_xlim([-1, 1])
+                ax.set_ylim([0, 1])
+                ax.scatter(polarity_list, subjectivity_list, s=5)
+                ax.set(xlabel='Polarity', ylabel='Subjectivity')
+                ax.set_title(k)
+
+        # adding title/layout and displaying plot
+        fig.suptitle('Sentiment Analysis')
+        plt.tight_layout()
+        plt.show()
+
+    def heaps_law(self):
         # total words
-        f = open(filename, encoding='utf-8')
-        text = f.read()
-        words = text.split()
-        words = [word.lower() for word in words]
+        words = self.data['words']
 
         total_word = []
         unique_word = []
