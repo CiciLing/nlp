@@ -1,9 +1,5 @@
-import pandas as pd
-
 import plotly.graph_objects as go
-from heapq import nlargest
 
-# check update
 def _code_mapping(df, src, targ):
     """ Map labels in src and targ columns to integers """
     # Get distinct labels

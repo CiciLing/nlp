@@ -6,17 +6,31 @@ import hw1 as hw
 from nltk import tokenize
 from textblob import TextBlob
 
-
 class Textastic:
-
     def __init__(self):
         """ Constructor """
         self.data = defaultdict(dict) # extracted data (state)
 
     def _save_results(self, label, results):
+        '''save results to data'''
         for k, v in results.items():
             self.data[k][label] = v
 
+    @staticmethod
+    def _load_stop_words(words, stop_file):
+        '''
+        Filter the stop words from file
+        :param words: total words in a file
+        :param stop_file: stop words that should get excluded
+        :return: words in a file excluding the stop words
+        '''
+        # initializing empty list to store all words once filtered
+        filtered_words = []
+        # filtering out stop words
+        for word in words:
+            if word not in stop_file:
+                filtered_words.append(word)
+        return filtered_words
     @staticmethod
     def _default_parser(filename):
         '''
@@ -30,9 +44,6 @@ class Textastic:
         f = open(filename, encoding='utf-8')
         text = f.read()
 
-        # initializing empty list to store all words once filtered
-        filtered_words = []
-
         # splitting text by words, converting to lowercase, and removing unnecessary characters
         words = text.split()
         stop_words = stopwords.words('english')
@@ -42,24 +53,27 @@ class Textastic:
         words = [word.strip(':') for word in words]
         words = [word.strip(',') for word in words]
 
-        # filtering out stop words
-        for word in words:
-            if word not in stop_words:
-                filtered_words.append(word)
+        # remove stop words
+        filtered_words = Textastic._load_stop_words(words,stop_words)
 
         # calling tokenize to seperate text into sentences
         sentences = tokenize.sent_tokenize(text)
 
+        # count words counts and number of words
         wc = dict(Counter(filtered_words))
         num = len(filtered_words)
-
         f.close()
 
-        return {'wordcount': wc, 'numwords': num, 'sentences': sentences, 'words': words}
+        return {'wordcount': wc, 'numwords': num, 'sentences': sentences}
 
 
     def load_text(self, filename, label=None, parser=None):
-        """Registers the text file with the NLP framework"""
+        """
+        Registers the text file with the NLP framework"
+        :param filename: the name of the file to be processed
+        :param label: the dictionary keys that represent the name of files
+        :param parser: parser that get basic information from files
+        """
 
         if parser == None:
             results = Textastic._default_parser(filename)
@@ -71,37 +85,32 @@ class Textastic:
 
         self._save_results(label, results)
 
-    def compare_num_words(self):
-        num_words = self.data['numwords']
-        for label, nw in num_words.items():
-            plt.bar(label, nw)
-        plt.show()
-
-    def extract_local_data(self,file1,file2,file3,file4):
+    def extract_local_data(self,file):
+        '''
+        :param file: the list of files a user input
+        :return: a concat dataframe containing the name of file, words in file, and frequency of these words
+        '''
         count_dict = self.data['wordcount']
-        df1 = pd.DataFrame(list(count_dict[file1].items()),columns=['word','frequency'])
-        df1.insert(0, 'Name', file1)
-        df2 = pd.DataFrame(list(count_dict[file2].items()),columns=['word','frequency'])
-        df2.insert(0, 'Name', file2)
-        df3 = pd.DataFrame(list(count_dict[file3].items()),columns=['word','frequency'])
-        df3.insert(0, 'Name', file3)
-        df4 = pd.DataFrame(list(count_dict[file4].items()), columns=['word', 'frequency'])
-        df4.insert(0, 'Name', file4)
-
-        df = pd.concat([df1, df2, df3, df4], ignore_index=True)
+        df = pd.DataFrame()
+        for i in range(len(file)):
+            df_file = pd.DataFrame(list(count_dict[file[i]].items()),columns=['word','frequency'])
+            df = pd.concat([df, df_file], ignore_index=True)
         return df
 
-    def execute_sankey(self, df, col, val, word_list = None, k = None, **kwargs):
+    def wordcount_sankey(self, df, col, val, word_list = None, k = None, **kwargs):
         '''
         :param df: original dataframe that contains selected data
         :param col: the targets and sources of the sankey diagram
         :param val: the name of grouped count column
+        :param word_list: users' specified list of words
+        :param k: an integer using to retrieve k most common words
+        :param kwargs: optional parameters eg. minimum values
         :return: a sankey diagram showing the connections
         '''
-        if word_list == None and k != None:
+        if k == None and word_list != None:
+            df2 = df[df[col[1]].isin(word_list)]
+        elif word_list == None and k != None:
             df2 = df.sort_values([val], ascending=False).groupby(col[0]).head(k)
-        elif k == None and word_list != None:
-            df2 = df[df['word'].isin(word_list)]
         else:
             min_val = kwargs.get('min_val', 7)
             df2 = df[df[val] >= min_val]
@@ -114,7 +123,6 @@ class Textastic:
 
         # pulls dictionary of sentences from data
         sentences_dict = self.data['sentences']
-
         # defining number of rows/cols based on number of text files in dict
         n = len(sentences_dict)
         cols = int(n ** .5)
@@ -150,10 +158,13 @@ class Textastic:
         fig.suptitle('Sentiment Analysis')
         plt.tight_layout()
         plt.show()
-
-    def heaps_law(self):
+    @staticmethod
+    def heaps_law(filename):
         # total words
-        words = self.data['words']
+        f = open(filename, encoding='utf-8')
+        text = f.read()
+        words = text.split()
+        words = [word.lower() for word in words]
 
         total_word = []
         unique_word = []
@@ -168,13 +179,16 @@ class Textastic:
         all_data = []
         for i in range(len(filename)):
             file_data = []
-            file_data = Textastic.heaps_law(self,filename[i])
+            file_data = Textastic.heaps_law(filename[i])
             all_data.append(file_data)
             plt.plot(all_data[i][0], all_data[i][1], label=label[i])
         print(all_data)
         plt.title('Heaps Law')
+        plt.xlabel('Total number of words')
+        plt.ylabel('Unique number of words')
         plt.legend()
         plt.show()
+
 
 
 
