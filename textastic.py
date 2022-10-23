@@ -74,7 +74,6 @@ class Textastic:
         :param label: the dictionary keys that represent the name of files
         :param parser: parser that get basic information from files
         """
-
         if parser == None:
             results = Textastic._default_parser(filename)
         else:
@@ -85,15 +84,23 @@ class Textastic:
 
         self._save_results(label, results)
 
-    def extract_local_data(self,file):
+    def extract_local_data(self,labels):
         '''
-        :param file: the list of files a user input
-        :return: a concat dataframe containing the name of file, words in file, and frequency of these words
+        :param labels: the list of labels of files
+        :return: a concat dataframe containing the name of files, words in file, and frequency of these words
         '''
+        # retrieve word count data from data
         count_dict = self.data['wordcount']
+        # create an empty dataframe
         df = pd.DataFrame()
-        for i in range(len(file)):
-            df_file = pd.DataFrame(list(count_dict[file[i]].items()),columns=['word','frequency'])
+
+        # create dataframe that has three columns - Name, word, frequency
+        for i in range(len(labels)):
+            # convert words and wordcounts from dictionary to df
+            df_file = pd.DataFrame(list(count_dict[labels[i]].items()),columns=['word','frequency'])
+            # assign the name of file to the words
+            df_file.insert(0, 'Name', labels[i])
+            # concat the 4 seperate dataframes from each file
             df = pd.concat([df, df_file], ignore_index=True)
         return df
 
@@ -107,9 +114,14 @@ class Textastic:
         :param kwargs: optional parameters eg. minimum values
         :return: a sankey diagram showing the connections
         '''
+        # three conditions
+        # 1) when there's no k and word list exist
         if k == None and word_list != None:
+            # return the dataframes that includes the words in word list
             df2 = df[df[col[1]].isin(word_list)]
+        # 2) when there's no word list and k exist
         elif word_list == None and k != None:
+            # return the dataframes
             df2 = df.sort_values([val], ascending=False).groupby(col[0]).head(k)
         else:
             min_val = kwargs.get('min_val', 7)
@@ -182,7 +194,6 @@ class Textastic:
             file_data = Textastic.heaps_law(filename[i])
             all_data.append(file_data)
             plt.plot(all_data[i][0], all_data[i][1], label=label[i])
-        print(all_data)
         plt.title('Heaps Law')
         plt.xlabel('Total number of words')
         plt.ylabel('Unique number of words')
