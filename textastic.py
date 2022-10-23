@@ -2,7 +2,7 @@ from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
 import pandas as pd
 from nltk.corpus import stopwords
-import hw1 as hw
+import sankey_library as sk
 from nltk import tokenize
 from textblob import TextBlob
 
@@ -64,7 +64,7 @@ class Textastic:
         num = len(filtered_words)
         f.close()
 
-        return {'wordcount': wc, 'numwords': num, 'sentences': sentences}
+        return {'wordcount': wc, 'numwords': num, 'sentences': sentences, 'words': filtered_words}
 
 
     def load_text(self, filename, label=None, parser=None):
@@ -123,10 +123,12 @@ class Textastic:
         elif word_list == None and k != None:
             # return the dataframes
             df2 = df.sort_values([val], ascending=False).groupby(col[0]).head(k)
+        # 3) when no word_list or k is provided
         else:
+            # show every word that appears more than 7 times
             min_val = kwargs.get('min_val', 7)
             df2 = df[df[val] >= min_val]
-        hw.show_sankey(df2, col[0], col[1], vals=val)
+        sk.show_sankey(df2, col[0], col[1], vals=val)
 
     def sentiment_subplot(self):
         '''
@@ -170,40 +172,52 @@ class Textastic:
         fig.suptitle('Sentiment Analysis')
         plt.tight_layout()
         plt.show()
-    @staticmethod
-    def heaps_law(filename):
-        # total words
-        f = open(filename, encoding='utf-8')
-        text = f.read()
-        words = text.split()
-        words = [word.lower() for word in words]
 
-        total_word = []
-        unique_word = []
-        uniq = set()
-        for i, token in enumerate(words):
-            uniq.add(token)
-            total_word.append(i)
-            unique_word.append(len(uniq))
-        return total_word, unique_word
+    def heaps_law(self, filename):
+        '''
+        :param filename: a list of labels that represent names of files
+        :return: a nested lists that include total words and unique words from each file
+        '''
+        # retrieve words data
+        words = self.data['words']
+        # prepare the final words count list
+        all_words = []
+        for index in range(len(filename)):
+            # go through each file
+            collect_words = []
+            total_word = []
+            unique_word = []
 
-    def plot_heaps(self, filename, label):
-        all_data = []
+            # only collect unique words
+            uniq = set()
+            for i, token in enumerate(words[filename[index]]):
+                # add unique words to uniq
+                uniq.add(token)
+                # add number of words to total_word
+                total_word.append(i)
+                # get the unique words by counting length of uniq
+                unique_word.append(len(uniq))
+
+            # add total words and unique words from each file to collect_word
+            collect_words.append(total_word)
+            collect_words.append(unique_word)
+            # add collect_words from each file to all words
+            all_words.append(collect_words)
+        return all_words
+
+    def plot_heaps(self, filename):
+        '''
+        Show heaps' law from each file
+        :param filename: a list of labels that represent names of files
+        '''
+        # get total and unique words data from heaps law function
+        all_data = Textastic.heaps_law(self, filename)
+        # plot total words on x axis, unique words on y axis
         for i in range(len(filename)):
-            file_data = []
-            file_data = Textastic.heaps_law(filename[i])
-            all_data.append(file_data)
-            plt.plot(all_data[i][0], all_data[i][1], label=label[i])
+            plt.plot(all_data[i][0], all_data[i][1], label=filename[i])
+        # add title, x & y axis name
         plt.title('Heaps Law')
         plt.xlabel('Total number of words')
         plt.ylabel('Unique number of words')
         plt.legend()
         plt.show()
-
-
-
-
-
-
-
-

@@ -15,13 +15,13 @@ def main():
     df = tt.extract_local_data(labels)
 
     # create and show sankey using name as target and word as source
-    #tt.wordcount_sankey(df, ['Name', 'word'], 'frequency', k = 5)
+    tt.wordcount_sankey(df, ['Name', 'word'], 'frequency', k = 5)
 
     # second viz: create subplots for each file showing the sentiments anaylsis
-    #tt.sentiment_subplot()
+    tt.sentiment_subplot()
 
     # third viz: testing heaps law
-    tt.plot_heaps(files, labels)
+    tt.plot_heaps(labels)
 
 
 if __name__ == '__main__':

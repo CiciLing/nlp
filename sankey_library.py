@@ -31,6 +31,7 @@ def make_sankey(df, src, targ, vals=None, **kwargs):
     df, labels = _code_mapping(df, src, targ)
     link = {'source': df[src], 'target': df[targ], 'value': values}
 
+    # add specifications to the sankey graph
     pad = kwargs.get('pad', 50)
     thickness = kwargs.get('thickness', 50)
     line_color = kwargs.get('line_color', 'black')
